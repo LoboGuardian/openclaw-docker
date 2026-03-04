@@ -1,0 +1,5 @@
+.env
+workspace/
+.git/
+*.md
+Makefile

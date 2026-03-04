@@ -1,0 +1,15 @@
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "openclaw"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+
+# If openclaw exposes an HTTP interface, Railway will auto-detect $PORT.
+# If it's a pure worker (no HTTP), comment out the healthcheck block.
+[deploy.healthcheck]
+path = "/"
+intervalSeconds = 30
+timeoutSeconds = 10
