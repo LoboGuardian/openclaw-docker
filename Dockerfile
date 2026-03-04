@@ -10,10 +10,14 @@ FROM node:22-slim AS installer
 RUN apt-get update && apt-get install -y --no-install-recommends git \
     && rm -rf /var/lib/apt/lists/*
 
-# Rewrite SSH GitHub URLs to HTTPS so no SSH key is needed at build time.
-# libsignal-node (whiskeysockets/Baileys dependency) uses ssh://git@github.com
-RUN git config --global url."https://github.com/".insteadOf "ssh://git@github.com/" \
-    && git config --global url."https://github.com/".insteadOf "git@github.com:"
+# Update npm to latest before installing packages
+RUN npm install -g npm@latest
+
+# Rewrite SSH GitHub URLs to HTTPS at the system level (/etc/gitconfig) so
+# it applies regardless of which user/HOME context npm invokes git with.
+# libsignal-node (whiskeysockets/Baileys) uses ssh://git@github.com at install time.
+RUN git config --system url."https://github.com/".insteadOf "ssh://git@github.com/" \
+    && git config --system url."https://github.com/".insteadOf "git@github.com:"
 
 RUN npm install -g openclaw && npm cache clean --force
 
