@@ -5,6 +5,9 @@
 # ─────────────────────────────────────────────────────────────────────────────
 FROM node:22-alpine AS installer
 
+# git is required by some of openclaw's npm dependencies during install
+RUN apk add --no-cache git
+
 RUN npm install -g openclaw && npm cache clean --force
 
 # ─────────────────────────────────────────────────────────────────────────────
