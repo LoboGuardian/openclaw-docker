@@ -1,22 +1,23 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # Stage 1: install
-# Run npm install as root in an isolated stage so the final image
-# never has npm, npx, or the package manager available to the agent.
+# node:22-slim (Debian) is required — node-llama-cpp needs glibc to use
+# prebuilt binaries. Alpine (musl libc) forces a full llama.cpp source build
+# which requires cmake, make, g++, and still fails without GPU drivers.
 # ─────────────────────────────────────────────────────────────────────────────
-FROM node:22-alpine AS installer
+FROM node:22-slim AS installer
 
 # git is required by some of openclaw's npm dependencies during install
-RUN apk add --no-cache git
+RUN apt-get update && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g openclaw && npm cache clean --force
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Stage 2: runtime — minimal hardened image
+# Stage 2: runtime — hardened image
 #
 # What this Dockerfile enforces (build-time):
 #   - Non-root user: agent cannot write outside /data
-#   - No npm/npx/shell tools: reduces post-exploitation surface
-#   - Minimal Alpine base: fewer CVEs
+#   - No npm/npx/git in runtime image: reduces post-exploitation surface
 #   - NODE_ENV=production: disables dev features, reduces memory footprint
 #   - dumb-init as PID 1: correct signal handling, no zombie processes
 #
@@ -31,17 +32,17 @@ RUN npm install -g openclaw && npm cache clean --force
 #   - Agent misuse of API keys already loaded in memory
 #   - Actions taken by integrations (Gmail, GitHub, etc.) via granted scopes
 # ─────────────────────────────────────────────────────────────────────────────
-FROM node:22-alpine
+FROM node:22-slim
 
-RUN apk add --no-cache dumb-init ca-certificates \
-    && rm -rf /var/cache/apk/*
+RUN apt-get update && apt-get install -y --no-install-recommends dumb-init \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy only the installed package, not npm itself
+# Copy only the installed package — npm, git, and build tools are NOT included
 COPY --from=installer /usr/local/lib/node_modules /usr/local/lib/node_modules
 COPY --from=installer /usr/local/bin/openclaw /usr/local/bin/openclaw
 
 # Non-root user
-RUN addgroup -S openclaw && adduser -S openclaw -G openclaw
+RUN groupadd -r openclaw && useradd -r -g openclaw openclaw
 
 # /data is the only directory the agent can read/write.
 # Mount a dedicated volume here — never mount $HOME or /
