@@ -7,8 +7,13 @@
 FROM node:22-slim AS installer
 
 # git is required by some of openclaw's npm dependencies during install
-RUN apt-get update && apt-get install -y --no-install-recommends git openssh-client \
+RUN apt-get update && apt-get install -y --no-install-recommends git \
     && rm -rf /var/lib/apt/lists/*
+
+# Rewrite SSH GitHub URLs to HTTPS so no SSH key is needed at build time.
+# libsignal-node (whiskeysockets/Baileys dependency) uses ssh://git@github.com
+RUN git config --global url."https://github.com/".insteadOf "ssh://git@github.com/" \
+    && git config --global url."https://github.com/".insteadOf "git@github.com:"
 
 RUN npm install -g openclaw && npm cache clean --force
 
