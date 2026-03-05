@@ -13,11 +13,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends git \
 # Update npm to latest before installing packages
 RUN npm install -g npm@latest
 
-# Rewrite SSH GitHub URLs to HTTPS at the system level (/etc/gitconfig) so
-# it applies regardless of which user/HOME context npm invokes git with.
-# libsignal-node (whiskeysockets/Baileys) uses ssh://git@github.com at install time.
-RUN git config --system url."https://github.com/".insteadOf "ssh://git@github.com/" \
-    && git config --system url."https://github.com/".insteadOf "git@github.com:"
+# Rewrite SSH GitHub URLs to HTTPS — libsignal-node (whiskeysockets/Baileys)
+# declares its dependency as github:whiskeysockets/libsignal-node which npm
+# resolves via ssh://git@github.com, failing in keyless build environments.
+# Written directly to /etc/gitconfig to guarantee both insteadOf rules coexist
+# (git config --system without --add silently overwrites the previous value).
+RUN printf '[url "https://github.com/"]\n\tinsteadOf = ssh://git@github.com/\n\tinsteadOf = git@github.com:\n' > /etc/gitconfig
 
 RUN npm install -g openclaw && npm cache clean --force
 
