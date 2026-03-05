@@ -7,7 +7,7 @@
 FROM node:22-slim AS installer
 
 # git is required by some of openclaw's npm dependencies during install
-RUN apt-get update && apt-get install -y --no-install-recommends git \
+RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # Update npm to latest before installing packages
