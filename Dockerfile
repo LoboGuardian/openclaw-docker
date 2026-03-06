@@ -49,7 +49,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends dumb-init \
 
 # Copy only the installed package — npm, git, and build tools are NOT included
 COPY --from=installer /usr/local/lib/node_modules /usr/local/lib/node_modules
-COPY --from=installer /usr/local/bin/openclaw /usr/local/bin/openclaw
+# Recreate the symlink instead of copying the file.
+# COPY follows symlinks and places the raw file at /usr/local/bin/openclaw,
+# which breaks Node's import("./dist/entry.js") resolution — it would resolve
+# relative to /usr/local/bin/ instead of the package root in node_modules.
+RUN ln -s /usr/local/lib/node_modules/openclaw/openclaw.mjs /usr/local/bin/openclaw
 
 # Non-root user
 RUN groupadd -r openclaw && useradd -r -g openclaw openclaw
