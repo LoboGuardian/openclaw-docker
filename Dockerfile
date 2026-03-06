@@ -65,6 +65,9 @@ RUN mkdir -p /data && chown openclaw:openclaw /data
 ENV NODE_ENV=production
 # Railway injects $PORT if openclaw exposes HTTP
 ENV PORT=3000
+# Openclaw loads many modules at startup — give Node.js enough heap.
+# 1536 MB leaves headroom on a 2 GB Railway instance.
+ENV NODE_OPTIONS="--max-old-space-size=1536"
 
 USER openclaw
 WORKDIR /data
