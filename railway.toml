@@ -3,7 +3,7 @@ builder = "dockerfile"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "openclaw"
+startCommand = "openclaw gateway"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
 

@@ -73,4 +73,4 @@ USER openclaw
 WORKDIR /data
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
-CMD ["openclaw"]
+CMD ["openclaw", "gateway"]
