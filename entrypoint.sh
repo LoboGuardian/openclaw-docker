@@ -42,6 +42,22 @@ fi
 # ── AI providers ──────────────────────────────────────────────────────────────
 # openclaw reads ANTHROPIC_API_KEY and OPENAI_API_KEY directly from the
 # environment — no config set needed for those.
+#
+# Free options:
+#   GEMINI_API_KEY    → Google Gemini Flash (free tier, aistudio.google.com)
+#   GROQ_API_KEY      → Groq free tier (console.groq.com)
+#   OPENROUTER_API_KEY→ OpenRouter free models (openrouter.ai)
+if [ -n "$GEMINI_API_KEY" ]; then
+  cfg gemini.apiKey "$GEMINI_API_KEY"
+fi
+
+if [ -n "$GROQ_API_KEY" ]; then
+  cfg groq.apiKey "$GROQ_API_KEY"
+fi
+
+if [ -n "$OPENROUTER_API_KEY" ]; then
+  cfg openrouter.apiKey "$OPENROUTER_API_KEY"
+fi
 
 # ── Channels ──────────────────────────────────────────────────────────────────
 if [ -n "$OPENCLAW_TELEGRAM_TOKEN" ]; then
