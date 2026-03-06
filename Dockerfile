@@ -72,5 +72,8 @@ ENV NODE_OPTIONS="--max-old-space-size=1536"
 USER openclaw
 WORKDIR /data
 
-ENTRYPOINT ["/usr/bin/dumb-init", "--"]
-CMD ["openclaw", "gateway"]
+# Entrypoint script: maps Railway env vars → openclaw config set, then starts gateway
+COPY --chown=openclaw:openclaw entrypoint.sh /entrypoint.sh
+
+ENTRYPOINT ["/usr/bin/dumb-init", "--", "/bin/sh", "/entrypoint.sh"]
+CMD []

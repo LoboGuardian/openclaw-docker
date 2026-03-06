@@ -3,3 +3,5 @@ workspace/
 .git/
 *.md
 Makefile
+# entrypoint.sh is explicitly included
+
